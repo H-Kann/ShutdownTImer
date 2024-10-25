@@ -35,39 +35,9 @@ public class HelloController {
     }
 
     public static void setLabels(int hour, int min, int sec, Label lbl_time){
-        if(hour<10 && min<10 && sec<10){
-            System.out.println(hour+":"+min+":"+sec);
-
-            lbl_time.setText("0"+ hour + ":0" + min + ":0" + sec);
-        }
-        if (hour<10 && min<10 && sec>=10) {
-            System.out.println(hour+":"+min+":"+sec);
-            lbl_time.setText("0"+ hour + ":0" + min + ":" + sec);
-        }
-        if (hour<10 && min>=10 && sec<10){
-            System.out.println(hour+":"+min+":"+sec);
-            lbl_time.setText("0"+ hour + ":" + min + ":0" + sec);
-        }
-        if (hour>=10 && min<10 && sec<10){
-            System.out.println(hour+":"+min+":"+sec);
-            lbl_time.setText(hour + ":0" + min + ":0" + sec);
-        }
-        if (hour<10 && min>=10 && sec>=10){
-            System.out.println(hour+":"+min+":"+sec);
-            lbl_time.setText("0"+ hour + ":0" + min + ":0" + sec);
-        }
-        if (hour>=10 && min<10 && sec>=10){
-            System.out.println(hour+":"+min+":"+sec);
-            lbl_time.setText(hour + ":0" + min + ":" + sec);
-        }
-        if (hour>=10 && min>=10 && sec<10){
-            System.out.println(hour+":"+min+":"+sec);
-            lbl_time.setText(hour + ":" + min + ":0" + sec);
-        }
-        if (hour>=10 && min>=10 && sec>=10){
-            System.out.println(hour+":"+min+":"+sec);
-            lbl_time.setText(hour + ":" + min + ":" + sec);
-        }
+        String formattedTime = String.format("%02d : %02d : %02d", hour, min, sec);
+        System.out.println(formattedTime);
+        lbl_time.setText(formattedTime);
 
     }
 
