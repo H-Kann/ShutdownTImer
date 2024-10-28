@@ -4,6 +4,7 @@ module com.shutdowntimer.shutdowntimer {
     requires com.dlsc.formsfx;
     requires java.desktop;
     requires atlantafx.base;
+    requires fxstage;
 
     opens com.shutdowntimer.shutdowntimer to javafx.fxml;
     exports com.shutdowntimer.shutdowntimer;

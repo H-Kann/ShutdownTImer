@@ -12,11 +12,12 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
-
 import java.io.IOException;
 import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.HashMap;
+import java.util.Map;
 
 public class HelloController {
     @FXML
@@ -31,39 +32,36 @@ public class HelloController {
     public ComboBox<String> cmb_theme;
     Timer timer;
 
-    Image imgStartPurple = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/icons/start_purple.png")));
-    ImageView imgViewPurple = new ImageView(imgStartPurple);
-    Image imgStartBlue = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/icons/start_blue.png")));
-    ImageView imgViewBlue = new ImageView(imgStartBlue);
-    Image imgStartWhite = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/icons/start_white.png")));
-    ImageView imgViewWhite = new ImageView(imgStartWhite);
-    Image imgStartBlack = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/icons/start_black.png")));
-    ImageView imgViewBlack = new ImageView(imgStartBlack);
+    private final Map<String, ImageView> startIcons = new HashMap<>();
+    private final Map<String, ImageView> stopIcons = new HashMap<>();
 
-
-    Image imgStopPurple = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/icons/stop_purple.png")));
-    ImageView imgViewStopPurple = new ImageView(imgStopPurple);
-    Image imgStopBlue = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/icons/stop_blue.png")));
-    ImageView imgViewStopBlue = new ImageView(imgStopBlue);
-    Image imgStopWhite = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/icons/stop_white.png")));
-    ImageView imgViewStopWhite = new ImageView(imgStopWhite);
-    Image imgStopBlack = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/icons/stop_black.png")));
-    ImageView imgViewStopBlack = new ImageView(imgStopBlack);
 
     public void initialize() {
-
+        loadIcons();
         Font.loadFont(getClass().getResourceAsStream("/fonts/Montserrat-Bold.ttf"), 96);
-
-        imgViewPurple.setFitHeight(20);
-        imgViewPurple.setFitWidth(20);
-        btn_start.setGraphic(imgViewPurple);
-
-
-        imgViewStopPurple.setFitHeight(20);
-        imgViewStopPurple.setFitWidth(20);
-        btn_cancel.setGraphic(imgViewStopPurple);
-
+        setInitialIcons();
+        setupSpinners();
+        setupThemeComboBox();
         lbl_time.setText("00 : 00 : 00");
+    }
+    private void loadIcons() {
+        String[] colors = {"purple", "blue", "white", "black"};
+        for (String color : colors) {
+            startIcons.put(color, createImageView("/icons/start_" + color + ".png"));
+            stopIcons.put(color, createImageView("/icons/stop_" + color + ".png"));
+        }
+    }
+
+    private ImageView createImageView(String iconPath) {
+        Image image = new Image(Objects.requireNonNull(getClass().getResourceAsStream(iconPath)));
+        return new ImageView(image);
+    }
+
+    private void setInitialIcons() {
+        setButtonIcons("purple");
+    }
+
+    private void setupSpinners() {
         SpinnerValueFactory<Integer> valueFactoryHour = new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 99);
         SpinnerValueFactory<Integer> valueFactoryMin = new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 59);
         SpinnerValueFactory<Integer> valueFactorySec = new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 59);
@@ -75,97 +73,67 @@ public class HelloController {
         spin_hour.setValueFactory(valueFactoryHour);
         spin_min.setValueFactory(valueFactoryMin);
         spin_sec.setValueFactory(valueFactorySec);
+    }
 
+    private void setupThemeComboBox() {
         ObservableList<String> options = FXCollections.observableArrayList("Cupertino Dark", "Cupertino Light", "Dracula", "Nord Dark", "Nord Light", "Primer Dark", "Primer Light");
         cmb_theme.setItems(options);
-        cmb_theme.setOnAction(_ -> {
-            switch (cmb_theme.getSelectionModel().getSelectedItem()) {
-                case "Cupertino Dark":
-                    Application.setUserAgentStylesheet(new CupertinoDark().getUserAgentStylesheet());
+        cmb_theme.setOnAction(_ -> handleThemeChange(cmb_theme.getSelectionModel().getSelectedItem()));
+    }
 
-                    imgViewBlue.setFitHeight(20);
-                    imgViewBlue.setFitWidth(20);
-                    btn_start.setGraphic(imgViewBlue);
+    private void handleThemeChange(String selectedTheme) {
+        String iconColor;
+        switch (selectedTheme) {
+            case "Cupertino Dark":
+            case "Cupertino Light":
+            case "Primer Dark":
+            case "Primer Light":
+                iconColor = "blue";
+                break;
+            case "Dracula":
+                iconColor = "purple";
+                break;
+            case "Nord Dark":
+                iconColor = "white";
+                break;
+            case "Nord Light":
+                iconColor = "black";
+                break;
+            default:
+                return;
+        }
 
-                    imgViewStopBlue.setFitHeight(20);
-                    imgViewStopBlue.setFitWidth(20);
-                    btn_cancel.setGraphic(imgViewStopBlue);
+        Application.setUserAgentStylesheet(getUserAgentStylesheet(selectedTheme));
+        setButtonIcons(iconColor);
+        lbl_time.setTextFill(selectedTheme.contains("Light") ? Color.BLACK : Color.WHITE);
+    }
 
-                    lbl_time.setTextFill(Color.WHITE);
-                    break;
-                case "Cupertino Light":
-                    Application.setUserAgentStylesheet(new CupertinoLight().getUserAgentStylesheet());
+    private String getUserAgentStylesheet(String theme) {
+        return switch (theme) {
+            case "Cupertino Dark" -> new CupertinoDark().getUserAgentStylesheet();
+            case "Cupertino Light" -> new CupertinoLight().getUserAgentStylesheet();
+            case "Dracula" -> new Dracula().getUserAgentStylesheet();
+            case "Nord Dark" -> new NordDark().getUserAgentStylesheet();
+            case "Nord Light" -> new NordLight().getUserAgentStylesheet();
+            case "Primer Dark" -> new PrimerDark().getUserAgentStylesheet();
+            case "Primer Light" -> new PrimerLight().getUserAgentStylesheet();
+            default -> null;
+        };
+    }
 
-                    imgViewBlue.setFitHeight(20);
-                    imgViewBlue.setFitWidth(20);
-                    btn_start.setGraphic(imgViewBlue);
+    private void setButtonIcons(String color) {
+        ImageView startIcon = startIcons.get(color);
+        ImageView stopIcon = stopIcons.get(color);
 
-                    imgViewStopBlue.setFitHeight(20);
-                    imgViewStopBlue.setFitWidth(20);
-                    btn_cancel.setGraphic(imgViewStopBlue);
+        if (startIcon != null && stopIcon != null) {
+            startIcon.setFitHeight(20);
+            startIcon.setFitWidth(20);
+            btn_start.setGraphic(startIcon);
 
-                    lbl_time.setTextFill(Color.BLACK);
-                    break;
-                case "Dracula":
-                    Application.setUserAgentStylesheet(new Dracula().getUserAgentStylesheet());
-                    imgViewPurple.setFitHeight(20);
-                    imgViewPurple.setFitWidth(20);
-                    btn_start.setGraphic(imgViewPurple);
-
-
-                    imgViewStopPurple.setFitHeight(20);
-                    imgViewStopPurple.setFitWidth(20);
-                    btn_cancel.setGraphic(imgViewStopPurple);
-                    lbl_time.setTextFill(Color.WHITE);
-                    break;
-                case "Nord Dark":
-                    Application.setUserAgentStylesheet(new NordDark().getUserAgentStylesheet());
-                    imgViewWhite.setFitHeight(20);
-                    imgViewWhite.setFitWidth(20);
-                    btn_start.setGraphic(imgViewWhite);
-
-
-                    imgViewStopWhite.setFitHeight(20);
-                    imgViewStopWhite.setFitWidth(20);
-                    btn_cancel.setGraphic(imgViewStopWhite);
-                    lbl_time.setTextFill(Color.WHITE);
-                    break;
-                case "Nord Light":
-                    Application.setUserAgentStylesheet(new NordLight().getUserAgentStylesheet());
-                    imgViewBlack.setFitHeight(20);
-                    imgViewBlack.setFitWidth(20);
-                    btn_start.setGraphic(imgViewBlack);
-
-
-                    imgViewStopBlack.setFitHeight(20);
-                    imgViewStopBlack.setFitWidth(20);
-                    btn_cancel.setGraphic(imgViewStopBlack);
-                    lbl_time.setTextFill(Color.BLACK);
-                    break;
-                case "Primer Dark":
-                    Application.setUserAgentStylesheet(new PrimerDark().getUserAgentStylesheet());
-                    imgViewBlue.setFitHeight(20);
-                    imgViewBlue.setFitWidth(20);
-                    btn_start.setGraphic(imgViewBlue);
-
-                    imgViewStopBlue.setFitHeight(20);
-                    imgViewStopBlue.setFitWidth(20);
-                    btn_cancel.setGraphic(imgViewStopBlue);
-                    lbl_time.setTextFill(Color.WHITE);
-                    break;
-                case "Primer Light":
-                    Application.setUserAgentStylesheet(new PrimerLight().getUserAgentStylesheet());
-                    imgViewBlue.setFitHeight(20);
-                    imgViewBlue.setFitWidth(20);
-                    btn_start.setGraphic(imgViewBlue);
-
-                    imgViewStopBlue.setFitHeight(20);
-                    imgViewStopBlue.setFitWidth(20);
-                    btn_cancel.setGraphic(imgViewStopBlue);
-                    lbl_time.setTextFill(Color.BLACK);
-                    break;
-            }
-        });
+            stopIcon.setFitHeight(20);
+            stopIcon.setFitWidth(20);
+            btn_cancel.setGraphic(stopIcon);
+        }
     }
 
     public static void setLabels(int hour, int min, int sec, Label lbl_time){
