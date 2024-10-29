@@ -78,7 +78,7 @@
             <!-- Default configuration for running with: mvn clean javafx:run -->
             <id>default-cli</id>
             <configuration>
-              <mainClass>com.shutdowntimer.shutdowntimer/com.shutdowntimer.shutdowntimer.HelloApplication</mainClass>
+              <mainClass>com.shutdowntimer.shutdowntimer/com.shutdowntimer.ShutdownTimer</mainClass>
               <launcher>app</launcher>
               <jlinkZipName>app</jlinkZipName>
               <jlinkImageName>app</jlinkImageName>
@@ -89,6 +89,31 @@
           </execution>
         </executions>
       </plugin>
+        <plugin>
+            <groupId>io.github.fvarrui</groupId>
+            <artifactId>javapackager</artifactId>
+            <version>1.7.6</version>
+            <executions>
+                <execution>
+                    <phase>package</phase>
+                    <goals>
+                        <goal>package</goal>
+                    </goals>
+                    <configuration>
+                        <mainClass>com.shutdowntimer.Main</mainClass>
+                        <bundleJre>true</bundleJre>
+                        <customizedJre>false</customizedJre>
+                        <generateInstaller>true</generateInstaller>
+                        <administratorRequired>false</administratorRequired>
+                        <platform>windows</platform>
+                        <!-- Change this if you want to use a custom icon -->
+<!--                        <winConfig>-->
+<!--                            <icoFile>C:/Users/Hamza/Desktop/Shutdowntimer.ico</icoFile>-->
+<!--                        </winConfig>-->
+                    </configuration>
+                </execution>
+            </executions>
+        </plugin>
     </plugins>
   </build>
 </project>

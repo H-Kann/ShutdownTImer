@@ -1,4 +1,4 @@
-package com.shutdowntimer.shutdowntimer;
+package com.shutdowntimer;
 
 import atlantafx.base.theme.*;
 import javafx.application.Application;
@@ -18,6 +18,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.prefs.Preferences;
 
 public class HelloController {
     @FXML
@@ -31,19 +32,28 @@ public class HelloController {
     public AnchorPane lyt_anchor;
     public ComboBox<String> cmb_theme;
     Timer timer;
-
+    private static final String THEME = "theme";
     private final Map<String, ImageView> startIcons = new HashMap<>();
     private final Map<String, ImageView> stopIcons = new HashMap<>();
 
+    private void savePreferences(String SelectedTheme) {
+        Preferences preferences = Preferences.userRoot().node(this.getClass().getName());
+        preferences.put(THEME, SelectedTheme);
+    }
+    private void loadPreferences(){
+        Preferences preferences = Preferences.userRoot().node(this.getClass().getName());
+        handleThemeChange(preferences.get(THEME, "Dracula"));
+    }
 
     public void initialize() {
         loadIcons();
+        loadPreferences();
         Font.loadFont(getClass().getResourceAsStream("/fonts/Montserrat-Bold.ttf"), 96);
-        setInitialIcons();
         setupSpinners();
         setupThemeComboBox();
         lbl_time.setText("00 : 00 : 00");
     }
+
     private void loadIcons() {
         String[] colors = {"purple", "blue", "white", "black"};
         for (String color : colors) {
@@ -55,10 +65,6 @@ public class HelloController {
     private ImageView createImageView(String iconPath) {
         Image image = new Image(Objects.requireNonNull(getClass().getResourceAsStream(iconPath)));
         return new ImageView(image);
-    }
-
-    private void setInitialIcons() {
-        setButtonIcons("purple");
     }
 
     private void setupSpinners() {
@@ -106,6 +112,7 @@ public class HelloController {
         Application.setUserAgentStylesheet(getUserAgentStylesheet(selectedTheme));
         setButtonIcons(iconColor);
         lbl_time.setTextFill(selectedTheme.contains("Light") ? Color.BLACK : Color.WHITE);
+        savePreferences(selectedTheme);
     }
 
     private String getUserAgentStylesheet(String theme) {
